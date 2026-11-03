@@ -14,12 +14,17 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Lint Workflow Files
-        # uses: reviewdog/action-actionlint@v1
-        uses: devops-actions/actionlint@v0.1.2
-        # with:
-        #   github_token: ${{ secrets.GITHUB_TOKEN }}
-        #   reporter: github-pr-review # Inline review comments on your Pull Request
+    #   - name: Lint Workflow Files
+        # uses: raven-actions/actionlint@v2
+        
+      - name: Install and Run Actionlint Natively
+        run: |
+          echo "=== Downloading Actionlint ==="
+            bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          
+          echo "=== Running Workflow Linting ==="
+          ./actionlint -color
+        shell: bash
 
       - name: Output Context Metadata
         run: |
@@ -28,5 +33,8 @@ jobs:
           echo "Workflow triggered by actor '${{ github.actor }}'."
 
       - name: Print Pull Request Title
+        # run: echo "Demo PR title is '${{ github.event.pull_request.title }}'."
         if: github.event_name == 'pull_request'
-        run: echo "Demo PR title is '${{ github.event.pull_request.title }}'."
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "Demo PR title is '$PR_TITLE'."
