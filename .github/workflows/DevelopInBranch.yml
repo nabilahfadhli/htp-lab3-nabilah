@@ -1,0 +1,49 @@
+# workflow to show how to develop workflows in branches
+name: Develop in a branch
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+    #   - name: Lint Workflow Files
+        # uses: devops-actions/actionlint@v0.1.2
+        # uses: raven-actions/actionlint@v2
+        
+      - name: Install and Run Actionlint Natively
+        run: |
+          echo "=== Downloading Actionlint ==="
+            bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          
+          echo "=== Running Workflow Linting ==="
+          ./actionlint -color
+        shell: bash
+
+      - name: Output Context Metadata
+        run: |
+          echo "Workflow triggered in branch '${{ github.ref }}'."
+          echo "Workflow triggered by event '${{ github.event_name }}'."
+          echo "Workflow triggered by actor '${{ github.actor }}'."
+
+      - name: Print Pull Request Title
+        # run: echo "Demo PR title is '${{ github.event.pull_request.title }}'."
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "Demo PR title is '$PR_TITLE'."
+        
+      - name: Log run metadata
+        run: | 
+          echo "::debug::This is a debug message."
+          echo "::notice::This is a notice message."
+          echo "::warning::This is a warning message."
+          echo "::error::This is an error message."
+          
