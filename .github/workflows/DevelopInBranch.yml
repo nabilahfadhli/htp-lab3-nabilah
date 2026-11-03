@@ -1,11 +1,32 @@
 # workflow to show how to develop workflows in branches
 name: Develop in a branch
+
 on: [pull_request, workflow_dispatch]
+
 jobs:
- job1:
+  job1:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
-     - run: |
-            echo "Workflow triggered in branch '${{ github.ref }}'."
-            echo "Workflow triggered by event '${{ github.event_name }}'."
-            echo "Workflow triggered by actor '${{ github.actor }} '."
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Lint Workflow Files
+        # uses: reviewdog/action-actionlint@v1
+        uses: devops-actions/actionlint@v0.1.2
+        # with:
+        #   github_token: ${{ secrets.GITHUB_TOKEN }}
+        #   reporter: github-pr-review # Inline review comments on your Pull Request
+
+      - name: Output Context Metadata
+        run: |
+          echo "Workflow triggered in branch '${{ github.ref }}'."
+          echo "Workflow triggered by event '${{ github.event_name }}'."
+          echo "Workflow triggered by actor '${{ github.actor }}'."
+
+      - name: Print Pull Request Title
+        if: github.event_name == 'pull_request'
+        run: echo "Demo PR title is '${{ github.event.pull_request.title }}'."
